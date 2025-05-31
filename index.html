@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Tone Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #333;
+        }
+        h1 {
+            color: #4caf50;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        input[type="file"] {
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333;
+        }
+        #uploadedImage {
+            margin-top: 20px;
+            width: 300px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Skin Tone Predictor</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="file">Upload an Image:</label>
+        <input type="file" id="file" name="file" accept="image/*" required />
+        <button type="submit">Predict</button>
+    </form>
+    <div id="result"></div>
+    <img id="uploadedImage" style="display: none;" />
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('file');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                const resultDiv = document.getElementById('result');
+                const uploadedImage = document.getElementById('uploadedImage');
+
+                if (result.error) {
+                    resultDiv.textContent = `Error: ${result.error}`;
+                    resultDiv.style.color = 'red';
+                    uploadedImage.style.display = 'none';
+                } else {
+                    resultDiv.innerHTML = `Predicted Skin Tone: <strong>${result.skin_tone}</strong><br>Confidence: <strong>${result.confidence.toFixed(2)}</strong>`;
+                    resultDiv.style.color = 'green';
+                    uploadedImage.src = `data:image/jpeg;base64,${result.uploaded_image}`;
+                    uploadedImage.style.display = 'block';
+                }
+            } catch (err) {
+                console.error(err);
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = 'An error occurred while processing your request.';
+                resultDiv.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>
