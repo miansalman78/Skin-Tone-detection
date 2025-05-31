@@ -1,6 +1,7 @@
-flask
-flask-cors
+Flask
 tensorflow
-pillow
+numpy
 opencv-python-headless
-gunicorn
+pillow
+flask-cors
+mtcnn
